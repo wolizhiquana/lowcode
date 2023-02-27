@@ -1,29 +1,28 @@
+import { Box, Container, Grid } from "@mui/material";
 import React, { useEffect } from "react";
 import { useAppDispatch } from "../../hooks";
+import DropBox from "./DropBox";
+import ComponentTag from "./EditableComponent";
+import Editable from "./EditableComponent";
 import { addComponentSchemaData } from "./editor.slice";
 
 export default function Editor() {
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    dispatch(
-      addComponentSchemaData({
-        componentType: "container",
-        referencedPath: [],
-        position: "into",
-      })
-    );
-
-    dispatch(
-      addComponentSchemaData({
-        componentType: "image",
-        referencedPath: [1],
-        position: "before",
-      })
-    );
-  }, []);
-
-  return <></>;
+  return (
+    // <Container>
+    <Grid container p={1}>
+      <Grid item xs={6}>
+        <ComponentTag type="image" />
+      </Grid>
+      <Grid item xs={6}>
+        <DropBox elementInfo={{ path: [], isContainer: true }}>
+          <Box height={200}></Box>
+        </DropBox>
+      </Grid>
+    </Grid>
+    // </Container>
+  );
 }
 
 // const createElement = (data: ComponentSchemaData): React.ReactNode => {

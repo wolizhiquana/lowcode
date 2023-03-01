@@ -3,19 +3,16 @@ interface TreeNode<T extends TreeNode<T>> {
   children?: Record<string, T>;
 }
 
-export const find = <T extends TreeNode<T>>(
-  root: T,
-  path: T["path"]
-): T | null => {
+export const find = <T extends TreeNode<T>>(root: T, path: T["path"]) => {
   let current = root;
 
   for (const key of path) {
     if (current.path.join() === path.join()) return current;
-    else if (!current.children || !current.children[key]) return null;
+    else if (!current.children || !current.children[key]) return;
     current = current.children[key];
   }
 
-  return current.path.join() === path.join() ? current : null;
+  return current.path.join() === path.join() ? current : undefined;
 };
 
 export const insert = <T extends TreeNode<T>>(root: T, node: T) => {

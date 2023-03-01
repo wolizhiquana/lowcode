@@ -1,9 +1,10 @@
 import { ReactNode, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { useAppDispatch } from "../../../hooks";
+import { useHoverDetector } from "../../../hooks/useHoverDetector";
 import { ComponentTagItem } from "../EditableComponent";
 import { addComponentSchemaData } from "../editor.slice";
-import { AddComponentSchemaDataPayload } from "../editor.type";
+import { AddComponentSchemaJsonPayload } from "../editor.type";
 import { DropContainer, DropContainerProps } from "./DropBox.styles";
 
 export interface DropBoxProps {
@@ -18,10 +19,14 @@ export default function DropBox({
   elementInfo: { path, isContainer = false },
   children,
 }: DropBoxProps) {
-  const [dropPosition, setDropPosition] =
-    useState<DropContainerProps["dropPosition"]>();
-  const despatch = useAppDispatch();
+  const [preDropPosition, setPreDropPosition] =
+    useState<DropContainerProps["preDropPosition"]>();
+
+  const dispatch = useAppDispatch();
+
   const ref = useRef<HTMLDivElement>(null);
+
+  const isHovering = useHoverDetector(ref, { shallow: true });
 
   const [{ isOver }, drop] = useDrop<
     ComponentTagItem,
@@ -32,7 +37,7 @@ export default function DropBox({
     drop(item, monitor) {
       const dragSourceType = monitor.getItemType();
       if (dragSourceType === "componentTag") {
-        const payload = {} as AddComponentSchemaDataPayload;
+        const payload = {} as AddComponentSchemaJsonPayload;
 
         payload.componentType = item.type;
         payload.referencedPath = path;
@@ -52,7 +57,7 @@ export default function DropBox({
           else payload.position = "after";
         }
 
-        despatch(addComponentSchemaData(payload));
+        dispatch(addComponentSchemaData(payload));
       } else if (dragSourceType === "element") {
       }
     },
@@ -64,26 +69,28 @@ export default function DropBox({
       const top = clientOffset.y - rect.top;
       const bottom = rect.bottom - clientOffset.y;
       if (isContainer) {
-        if (top < rect.height / 5) setDropPosition("upper");
-        else if (bottom < rect.height / 5) setDropPosition("lower");
-        else setDropPosition("middle");
+        if (top < rect.height / 5) setPreDropPosition("upper");
+        else if (bottom < rect.height / 5) setPreDropPosition("lower");
+        else setPreDropPosition("middle");
       } else {
-        if (top < rect.height / 2) setDropPosition("upper");
-        else setDropPosition("lower");
+        if (top < rect.height / 2) setPreDropPosition("upper");
+        else setPreDropPosition("lower");
       }
     },
     collect: (monitor) => {
-      return { isOver: monitor.isOver() };
+      return { isOver: monitor.isOver({ shallow: true }) };
     },
   }));
+
   drop(ref);
 
   return (
     <DropContainer
       ref={ref}
       selected={false}
-      dropPosition={dropPosition}
-      isOver={isOver}
+      isHovering={isHovering}
+      isDragOvering={isOver}
+      preDropPosition={preDropPosition}
     >
       {children}
     </DropContainer>

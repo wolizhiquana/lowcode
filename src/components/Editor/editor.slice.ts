@@ -1,20 +1,22 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../../store";
 import { find, insert } from "../../utils/dataStructure/pathTree";
 import {
-  AddComponentSchemaDataPayload,
-  ComponentSchemaData,
+  AddComponentSchemaJsonPayload,
+  ComponentSchemaJson,
 } from "./editor.type";
-import { getComponentDefaultProps } from "./schemaConfig";
+import { getComponentDefaultProps } from "./config/schemaConfig";
 
 export interface EditorState {
-  componentSchemaJson: ComponentSchemaData;
+  componentSchemaJson: ComponentSchemaJson;
+  currentSchemaPath?: number[];
   nextUId: number;
 }
 
 const initialState: EditorState = {
   componentSchemaJson: {
-    path: [] as ComponentSchemaData["path"],
-  } as ComponentSchemaData,
+    path: [] as ComponentSchemaJson["path"],
+  } as ComponentSchemaJson,
   nextUId: 1,
 };
 
@@ -22,9 +24,9 @@ const slice = createSlice({
   name: "editor",
   initialState,
   reducers: {
-    addComponentSchemaData: (
+    addComponentSchemaJson: (
       state,
-      action: PayloadAction<AddComponentSchemaDataPayload>
+      action: PayloadAction<AddComponentSchemaJsonPayload>
     ) => {
       const { componentType, referencedPath, position } = action.payload;
 
@@ -65,8 +67,34 @@ const slice = createSlice({
         );
       }
     },
+
+    setCurrentSchemaPath: (
+      state,
+      action: PayloadAction<{ path: number[] }>
+    ) => {
+      state.currentSchemaPath = action.payload.path;
+    },
   },
 });
 
 export const editorReducer = slice.reducer;
-export const { addComponentSchemaData } = slice.actions;
+export const { addComponentSchemaJson, setCurrentSchemaPath } = slice.actions;
+
+// Selectors
+export const selectEditorReducer = (state: RootState): EditorState =>
+  state.eidtor;
+
+export const selectRootComponentSchemaJson = createSelector(
+  [selectEditorReducer],
+  ({ componentSchemaJson }) => componentSchemaJson
+);
+
+export const selectComponentSchemaJsonByPath = (path: number[]) =>
+  createSelector([selectEditorReducer], ({ componentSchemaJson }) =>
+    find(componentSchemaJson, path)
+  );
+
+export const selectCurrentSchemaPath = createSelector(
+  [selectEditorReducer],
+  ({ currentSchemaPath: selectedPath }) => selectedPath
+);

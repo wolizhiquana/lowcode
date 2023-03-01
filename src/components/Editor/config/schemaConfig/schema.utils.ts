@@ -9,6 +9,10 @@ export const getComponentSchema = (type: string): ComponentSchema => {
   return schema;
 };
 
+export const getComponentSchemas = (): ComponentSchema[] => {
+  return Object.values(componentSchemaMap);
+};
+
 export const getComponent = (type: string): ComponentSchema["component"] => {
   return getComponentSchema(type).component;
 };

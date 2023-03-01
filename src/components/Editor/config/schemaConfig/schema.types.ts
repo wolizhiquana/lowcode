@@ -1,7 +1,9 @@
 export interface ComponentSchema {
   type: string;
+  label: string;
   component: React.ComponentType<any> | keyof JSX.IntrinsicElements;
   propSchemas?: Record<string, PropSchema>;
+  isContainer?: boolean;
 }
 
 export interface PropSchemaBase {

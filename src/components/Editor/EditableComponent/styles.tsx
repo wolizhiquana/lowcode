@@ -5,16 +5,13 @@ import { blue } from "@mui/material/colors";
 export interface DropContainerProps {
   selected?: boolean;
   isHovering?: boolean;
-  isDragOvering?: boolean;
+  isDragHovering?: boolean;
   preDropPosition?: "upper" | "middle" | "lower";
 }
 
 const BLUE_COLOR = blue[500];
 
 export const DropContainer = styled("div")<DropContainerProps>`
-  display: inline-block;
-  height: auto;
-
   ${({ selected }) =>
     selected &&
     css`
@@ -30,13 +27,13 @@ export const DropContainer = styled("div")<DropContainerProps>`
       `}
   }
 
-  ${({ isDragOvering }) =>
+  ${({ isDragHovering: isDragOvering }) =>
     isDragOvering &&
     css`
       outline-style: none;
     `}
 
-  ${({ isDragOvering, preDropPosition }) =>
+  ${({ isDragHovering: isDragOvering, preDropPosition }) =>
     isDragOvering &&
     (preDropPosition === "upper"
       ? css`

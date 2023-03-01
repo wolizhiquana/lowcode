@@ -1,4 +1,3 @@
-import Heading from "../customComponents/Heading";
 import { ComponentSchema } from "./schema.types";
 
 export interface ComponentSchemaMap {
@@ -6,34 +5,9 @@ export interface ComponentSchemaMap {
 }
 
 export const componentSchemaMap: ComponentSchemaMap = {
-  heading: {
-    type: "heading",
-    component: Heading,
-    propSchemas: {
-      level: {
-        name: "level",
-        label: "分级",
-        type: "string",
-        enum: [
-          { label: "一级标题", value: "h1" },
-          { label: "二级标题", value: "h2" },
-          { label: "三级标题", value: "h3" },
-          { label: "四级标题", value: "h4" },
-          { label: "五级标题", value: "h5" },
-          { label: "六级标题", value: "h6" },
-        ],
-        default: "h1",
-      },
-      children: {
-        name: "children",
-        label: "标题内容",
-        type: "string",
-        default: "标题内容",
-      },
-    },
-  },
   paragraph: {
     type: "paragraph",
+    label: "段落",
     component: "p",
     propSchemas: {
       children: {
@@ -46,13 +20,20 @@ export const componentSchemaMap: ComponentSchemaMap = {
   },
   link: {
     type: "link",
+    label: "链接",
     component: "a",
     propSchemas: {
-      hildren: {
+      children: {
         name: "children",
         label: "文本内容",
         type: "string",
         default: "文本内容",
+      },
+      href: {
+        name: "href",
+        label: "链接地址",
+        type: "string",
+        default: "#",
       },
       target: {
         name: "target",
@@ -68,6 +49,7 @@ export const componentSchemaMap: ComponentSchemaMap = {
   },
   image: {
     type: "image",
+    label: "图片",
     component: "img",
     propSchemas: {
       src: {
@@ -86,6 +68,8 @@ export const componentSchemaMap: ComponentSchemaMap = {
   },
   container: {
     type: "container",
+    label: "普通容器",
     component: "div",
+    isContainer: true,
   },
 };

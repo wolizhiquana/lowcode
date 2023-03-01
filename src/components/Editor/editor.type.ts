@@ -1,12 +1,12 @@
-export interface ComponentSchemaData {
+export interface ComponentSchemaJson {
   path: number[];
   type: string;
   props: Record<string, any>;
-  children?: Record<string, ComponentSchemaData>;
+  children?: Record<string, ComponentSchemaJson>;
   childrenOrder?: number[];
 }
 
-export interface AddComponentSchemaDataPayload {
+export interface AddComponentSchemaJsonPayload {
   componentType: string;
   referencedPath: number[];
   position: "into" | "before" | "after";

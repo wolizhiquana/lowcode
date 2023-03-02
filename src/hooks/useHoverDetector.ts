@@ -8,17 +8,17 @@ export function useHoverDetector(
   ref: RefObject<HTMLElement>,
   { shallow = false }: useHoverDetectorOptions = {}
 ) {
-  const [isHover, setIsHover] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleMouseOver = (e: MouseEvent): void => {
-    if (ref.current) {
-      if (shallow) setIsHover(ref.current === e.target);
-      else setIsHover(ref.current.contains(e.target as Node));
+    if (ref?.current) {
+      if (shallow) setIsHovering(ref.current === e.target);
+      else setIsHovering(ref.current.contains(e.target as Node));
     }
   };
 
   const handleMouseLeave = () => {
-    setIsHover(false);
+    setIsHovering(false);
   };
 
   useEffect(() => {
@@ -27,9 +27,9 @@ export function useHoverDetector(
 
     return () => {
       ref.current?.removeEventListener("mouseover", handleMouseOver);
-      ref.current?.removeEventListener("mouseleave", handleMouseOver);
+      ref.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, [ref]);
 
-  return isHover;
+  return isHovering;
 }

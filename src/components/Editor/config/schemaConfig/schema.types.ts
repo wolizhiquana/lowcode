@@ -1,7 +1,9 @@
+import { ComponentType, ReactHTML } from "react";
+
 export interface ComponentSchema {
   type: string;
   label: string;
-  component: React.ComponentType<any> | keyof JSX.IntrinsicElements;
+  Component: ComponentType<any> | keyof ReactHTML;
   propSchemas?: Record<string, PropSchema>;
   isContainer?: boolean;
 }

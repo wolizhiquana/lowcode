@@ -8,7 +8,7 @@ export const componentSchemaMap: ComponentSchemaMap = {
   paragraph: {
     type: "paragraph",
     label: "段落",
-    component: "p",
+    Component: "p",
     propSchemas: {
       children: {
         name: "children",
@@ -21,7 +21,7 @@ export const componentSchemaMap: ComponentSchemaMap = {
   link: {
     type: "link",
     label: "链接",
-    component: "a",
+    Component: "a",
     propSchemas: {
       children: {
         name: "children",
@@ -50,7 +50,7 @@ export const componentSchemaMap: ComponentSchemaMap = {
   image: {
     type: "image",
     label: "图片",
-    component: "img",
+    Component: "img",
     propSchemas: {
       src: {
         name: "src",
@@ -69,7 +69,7 @@ export const componentSchemaMap: ComponentSchemaMap = {
   container: {
     type: "container",
     label: "普通容器",
-    component: "div",
+    Component: "div",
     isContainer: true,
   },
 };

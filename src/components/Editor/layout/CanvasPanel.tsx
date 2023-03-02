@@ -13,20 +13,22 @@ const CanvasContainer = styled(Box)`
 `;
 
 export default function CanvasPanel() {
-  const containerRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [justifyContent, setJustifyContent] = useState<"start" | "center">(
     "center"
   );
 
   useEffect(() => {
     const handler = () => {
-      const containerWidth =
-        containerRef.current!.getBoundingClientRect().width;
-      const canvasWidth = canvasRef.current!.getBoundingClientRect().width;
+      if (containerRef?.current && canvasRef?.current) {
+        const containerWidth =
+          containerRef.current.getBoundingClientRect().width;
+        const canvasWidth = canvasRef.current.getBoundingClientRect().width;
 
-      if (containerWidth < canvasWidth) setJustifyContent("start");
-      else setJustifyContent("center");
+        if (containerWidth < canvasWidth) setJustifyContent("start");
+        else setJustifyContent("center");
+      }
     };
 
     handler();

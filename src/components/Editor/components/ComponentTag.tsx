@@ -6,12 +6,12 @@ export interface ComponentTagProps {
   label: string;
 }
 
-export interface ComponentTagObject {
+export interface ComponentTagDragObject {
   type: string;
 }
 
 export default function ComponentTag({ type, label }: ComponentTagProps) {
-  const [, drag] = useDrag<ComponentTagObject>({
+  const [, drag] = useDrag<ComponentTagDragObject>({
     type: "componentTag",
     item: { type },
   });

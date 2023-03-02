@@ -1,38 +1,48 @@
-import { Box } from "@mui/material";
 import { blue } from "@mui/material/colors";
-import { CSSProperties, ReactNode, useEffect, useRef, useState } from "react";
+import {
+  ComponentType,
+  CSSProperties,
+  ReactHTML,
+  ReactNode,
+  useRef,
+  useState,
+} from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
-import useBoundingClientRect from "../../../hooks/useBoundingClientRect";
 import { useHoverDetector } from "../../../hooks/useHoverDetector";
-import { ComponentTagObject } from "../components/ComponentTag";
+import { ComponentTagDragObject } from "./ComponentTag";
 import {
   addComponentSchemaJson,
+  moveComponentSchemaJson,
   selectComponentSchemaJsonByPath,
   selectCurrentSchemaPath,
-  selectRootComponentSchemaJson,
   setCurrentSchemaPath,
 } from "../editor.slice";
 import {
   AddComponentSchemaJsonPayload,
-  ComponentSchemaJson,
+  MoveComponentSchemaJsonPayload,
 } from "../editor.type";
-import { getComponent, getComponentSchema } from "../config/schemaConfig";
-import { DropContainer } from "./styles";
 
 export interface EditableComponentProps {
   path: number[];
+  Component: ComponentType<any> | keyof ReactHTML;
+  isContainer?: boolean;
+  props: Record<string, any>;
   children?: ReactNode[];
 }
 
-export interface EditableComponentDragObject {}
+export interface EditableComponentDragObject {
+  path: number[];
+}
 
 export default function EditableComponent({
   path,
+  Component,
+  isContainer,
+  props,
   children,
 }: EditableComponentProps) {
   const ref = useRef<HTMLElement>(null);
-  const componentData = useAppSelector(selectComponentSchemaJsonByPath(path));
   const isSelected = useAppSelector(selectCurrentSchemaPath) === path;
   const [preDropPosition, setPreDropPosition] = useState<
     "upper" | "middle" | "lower"
@@ -45,7 +55,7 @@ export default function EditableComponent({
   };
 
   const [{ isDragHovering, domRect }, drop] = useDrop<
-    ComponentTagObject | EditableComponentDragObject,
+    ComponentTagDragObject | EditableComponentDragObject,
     void,
     { isDragHovering: boolean; domRect?: DOMRect }
   >({
@@ -57,9 +67,6 @@ export default function EditableComponent({
       const top = clientOffset.y - domRect.top;
       const bottom = domRect.bottom - clientOffset.y;
 
-      let isContainer;
-      if (componentData)
-        isContainer = getComponentSchema(componentData.type).isContainer;
       if (isContainer) {
         if (top < domRect.height / 5) setPreDropPosition("upper");
         else if (bottom < domRect.height / 5) setPreDropPosition("lower");
@@ -69,6 +76,14 @@ export default function EditableComponent({
         else setPreDropPosition("lower");
       }
     },
+    canDrop: (item, monitor) => {
+      const acceptType = monitor.getItemType();
+
+      if (acceptType === "editableElement")
+        if ((item as EditableComponentDragObject).path === path) return false;
+
+      return true;
+    },
     drop: (item, monitor) => {
       const acceptType = monitor.getItemType();
 
@@ -76,13 +91,25 @@ export default function EditableComponent({
         if (acceptType === "componentTag") {
           const payload = {} as AddComponentSchemaJsonPayload;
 
-          payload.componentType = (item as ComponentTagObject).type;
+          payload.componentType = (item as ComponentTagDragObject).type;
           payload.referencedPath = path;
           if (preDropPosition === "upper") payload.position = "before";
           else if (preDropPosition === "middle") payload.position = "into";
           else payload.position = "after";
 
           dispatch(addComponentSchemaJson(payload));
+        } else if (acceptType === "editableElement") {
+          const payload = {} as MoveComponentSchemaJsonPayload;
+
+          payload.movingComponentPath = (
+            item as EditableComponentDragObject
+          ).path;
+          payload.targetComponentPath = path;
+          if (preDropPosition === "upper") payload.position = "before";
+          else if (preDropPosition === "middle") payload.position = "into";
+          else payload.position = "after";
+
+          dispatch(moveComponentSchemaJson(payload));
         }
       }
     },
@@ -94,23 +121,25 @@ export default function EditableComponent({
 
   const [, drag] = useDrag({
     type: "editableElement",
+    item: { path },
   });
 
   drag(drop(ref));
-
-  if (!componentData) return null;
-  const { component: Component, isContainer } = getComponentSchema(
-    componentData.type
-  );
 
   let styles: CSSProperties = {};
   const BLUE_COLOR = blue[500];
   if (isContainer && !children) {
     styles.height = "50px";
-    styles.outline = "grey dashed 2px";
+    styles.outline = "grey dashed 3px";
+    styles.outlineOffset = "-3px";
   }
-  if (isSelected) styles.outline = `${BLUE_COLOR} solid 2px`;
-  else if (isHovering) styles.outline = `${BLUE_COLOR} dotted 2px`;
+  if (isSelected) {
+    styles.outline = `${BLUE_COLOR} solid 3px`;
+    styles.outlineOffset = "-3px";
+  } else if (isHovering) {
+    styles.outline = `${BLUE_COLOR} dotted 3px`;
+    styles.outlineOffset = "-3px";
+  }
 
   if (isDragHovering) {
     styles.outline = "none";
@@ -124,46 +153,10 @@ export default function EditableComponent({
   return (
     <Component
       ref={ref}
-      {...componentData.props}
-      children={children || componentData.props.children}
-      style={{ ...styles, ...componentData.props.style }}
-      onClick={(e: MouseEvent) => {
-        handleClick(e), componentData.props.onClick?.call();
-      }}
+      {...props}
+      children={children || props.children}
+      style={{ ...styles, ...props.style }}
+      onClick={handleClick}
     />
   );
 }
-
-export function DrawerTest() {
-  const { children, childrenOrder } = useAppSelector(
-    selectRootComponentSchemaJson
-  );
-
-  let renderedChildren;
-  if (children && childrenOrder) {
-    renderedChildren = childrenOrder.map((id) =>
-      createEditableElement(children[id])
-    );
-  }
-
-  return <Box height={"100vh"}>{renderedChildren}</Box>;
-}
-
-const createEditableElement = (data: ComponentSchemaJson): React.ReactNode => {
-  const { path, children, childrenOrder } = data;
-
-  let renderedChildren;
-  if (children && childrenOrder) {
-    renderedChildren = childrenOrder.map((id) =>
-      createEditableElement(children[id])
-    );
-  }
-
-  return (
-    <EditableComponent
-      key={path.join()}
-      path={path}
-      children={renderedChildren}
-    />
-  );
-};

@@ -2,7 +2,7 @@ import { ReactNode, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { useAppDispatch } from "../../../hooks";
 import { useHoverDetector } from "../../../hooks/useHoverDetector";
-import { ComponentTagItem } from "../EditableComponent";
+import { ComponentTagItem } from "../components/EditableComponent";
 import { addComponentSchemaData } from "../editor.slice";
 import { AddComponentSchemaJsonPayload } from "../editor.type";
 import { DropContainer, DropContainerProps } from "./DropBox.styles";
